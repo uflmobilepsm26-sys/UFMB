@@ -1,5 +1,6 @@
 /* =========================================================
    UFMB — DATABASE ENGINE
+   Loads player data from data/players.json
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,108 +13,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const positionFilter = document.getElementById("positionFilter");
     const versionFilter = document.getElementById("versionFilter");
 
+    let players = [];
+
 
     /* =====================================================
-       DATABASE
+       LOAD DATABASE
        ===================================================== */
 
-    const players = [
+    async function loadDatabase() {
 
-        {
-            name: "Beckenbauer",
-            ovr: 95,
-            position: "CB",
-            nation: "Germany",
-            pac: 84,
-            sho: 67,
-            pas: 91,
-            dri: 87,
-            def: 94,
-            phy: 82,
-            perk: "Leadership",
-            version: "Icon"
-        },
+        try {
 
-        {
-            name: "Kahn",
-            ovr: 99,
-            position: "GK",
-            nation: "Germany",
-            pac: 72,
-            sho: 45,
-            pas: 76,
-            dri: 55,
-            def: 96,
-            phy: 91,
-            perk: "Wall",
-            version: "Icon"
-        },
+            const response = await fetch("data/players.json");
 
-        {
-            name: "Hakimi",
-            ovr: 94,
-            position: "RB",
-            nation: "Morocco",
-            pac: 96,
-            sho: 76,
-            pas: 84,
-            dri: 88,
-            def: 79,
-            phy: 82,
-            perk: "Rapid",
-            version: "Night Palm Tree"
-        },
+            if (!response.ok) {
+                throw new Error(
+                    `Database request failed: ${response.status}`
+                );
+            }
 
-        {
-            name: "Martínez",
-            ovr: 96,
-            position: "CB",
-            nation: "Argentina",
-            pac: 82,
-            sho: 51,
-            pas: 72,
-            dri: 68,
-            def: 95,
-            phy: 94,
-            perk: "Interceptor",
-            version: "Night Palm Tree"
-        },
+            players = await response.json();
 
-        {
-            name: "Cucurella",
-            ovr: 93,
-            position: "LB",
-            nation: "Spain",
-            pac: 87,
-            sho: 55,
-            pas: 81,
-            dri: 84,
-            def: 82,
-            phy: 78,
-            perk: "Pressing",
-            version: "Night Palm Tree"
-        },
+            renderPlayers(players);
 
-        {
-            name: "Olise",
-            ovr: 94,
-            position: "RM",
-            nation: "France",
-            pac: 88,
-            sho: 86,
-            pas: 91,
-            dri: 94,
-            def: 52,
-            phy: 70,
-            perk: "Playmaker",
-            version: "Night Palm Tree"
+        } catch (error) {
+
+            console.error(
+                "UFMB database error:",
+                error
+            );
+
+            showDatabaseError();
+
         }
 
-    ];
+    }
 
 
     /* =====================================================
-       RENDER DATABASE
+       RENDER PLAYERS
        ===================================================== */
 
     function renderPlayers(list) {
@@ -121,7 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
         grid.innerHTML = "";
 
         resultCount.textContent =
-            `${list.length} ${list.length === 1 ? "RESULT" : "RESULTS"}`;
+            `${list.length} ${
+                list.length === 1
+                    ? "RESULT"
+                    : "RESULTS"
+            }`;
 
 
         if (list.length === 0) {
@@ -146,9 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         list.forEach(player => {
 
-            const card = createPlayerCard(player);
-
-            grid.appendChild(card);
+            grid.appendChild(
+                createPlayerCard(player)
+            );
 
         });
 
@@ -156,14 +98,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       CREATE PLAYER CARD
+       PLAYER CARD
        ===================================================== */
 
     function createPlayerCard(player) {
 
-        const card = document.createElement("article");
+        const card =
+            document.createElement("article");
 
         card.className = "player-card";
+
 
         card.innerHTML = `
 
@@ -172,15 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>
 
                     <div class="card-version">
-                        ${player.version}
+                        ${escapeHTML(player.version)}
                     </div>
 
                     <div class="card-position">
-                        ${player.position}
+                        ${escapeHTML(player.position)}
                     </div>
 
                 </div>
-
 
                 <div class="card-rating">
                     ${player.ovr}
@@ -190,12 +133,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             <div class="card-name">
-                ${player.name}
+                ${escapeHTML(player.name)}
             </div>
 
 
             <div class="card-nation">
-                ${player.nation}
+                ${escapeHTML(player.nation)}
             </div>
 
 
@@ -213,11 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
 
-        card.addEventListener("click", () => {
-
-            showPlayerDetails(player);
-
-        });
+        card.addEventListener(
+            "click",
+            () => showPlayerDetails(player)
+        );
 
 
         return card;
@@ -251,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       SEARCH + FILTER
+       SEARCH + FILTERS
        ===================================================== */
 
     function filterPlayers() {
@@ -280,29 +222,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 /* Search */
 
+                const searchableText = [
+
+                    player.name,
+                    player.nation,
+                    player.position,
+                    player.perk,
+                    player.version
+
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
+
                 const matchesSearch =
                     !search ||
-
-                    player.name
-                        .toLowerCase()
-                        .includes(search) ||
-
-                    player.nation
-                        .toLowerCase()
-                        .includes(search) ||
-
-                    player.position
-                        .toLowerCase()
-                        .includes(search) ||
-
-                    player.perk
-                        .toLowerCase()
-                        .includes(search);
+                    searchableText.includes(search);
 
 
                 /* OVR */
 
                 let matchesOvr = true;
+
 
                 if (selectedOvr) {
 
@@ -317,16 +258,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const matchesPosition =
                     !selectedPosition ||
-
                     player.position ===
                     selectedPosition;
 
 
-                /* Card Version */
+                /* Card version */
 
                 const matchesVersion =
                     !selectedVersion ||
-
                     player.version ===
                     selectedVersion;
 
@@ -357,11 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
             `${player.name}\n\n` +
 
             `OVR: ${player.ovr}\n` +
-
             `Position: ${player.position}\n` +
-
             `Nation: ${player.nation}\n` +
-
             `Card: ${player.version}\n\n` +
 
             `PAC: ${player.pac}\n` +
@@ -374,6 +310,51 @@ document.addEventListener("DOMContentLoaded", () => {
             `Perk: ${player.perk}`
 
         );
+
+    }
+
+
+    /* =====================================================
+       DATABASE ERROR
+       ===================================================== */
+
+    function showDatabaseError() {
+
+        resultCount.textContent =
+            "DATABASE ERROR";
+
+
+        grid.innerHTML = `
+
+            <div class="empty-state">
+
+                <strong>
+                    DATABASE UNAVAILABLE
+                </strong>
+
+                <span>
+                    Please try again later.
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =====================================================
+       HTML SAFETY
+       ===================================================== */
+
+    function escapeHTML(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
     }
 
@@ -407,9 +388,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       INITIAL LOAD
+       START
        ===================================================== */
 
-    renderPlayers(players);
+    loadDatabase();
 
 });
