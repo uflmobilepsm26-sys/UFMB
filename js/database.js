@@ -1,280 +1,335 @@
 /* =========================================================
-   UFMB — DATABASE ENGINE
-   Loads player data from data/players.json
+   UFMB — DATABASE
+   V1
+   ========================================================= */
+
+let ufmbPlayers = [];
+
+
+/* =========================================================
+   START
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const grid = document.getElementById("databaseGrid");
-    const resultCount = document.getElementById("resultCount");
+    if (document.body.dataset.page !== "database") {
+        return;
+    }
 
-    const searchInput = document.getElementById("searchInput");
-    const ovrFilter = document.getElementById("ovrFilter");
-    const positionFilter = document.getElementById("positionFilter");
-    const versionFilter = document.getElementById("versionFilter");
+    initDatabase();
 
-    let players = [];
+});
 
 
-    /* =====================================================
-       LOAD DATABASE
-       ===================================================== */
+/* =========================================================
+   DATABASE INIT
+   ========================================================= */
 
-    async function loadDatabase() {
+async function initDatabase() {
 
-        try {
+    const grid =
+        document.getElementById("databaseGrid");
 
-            const response = await fetch("data/players.json");
+    const searchInput =
+        document.getElementById("searchInput");
 
-            if (!response.ok) {
-                throw new Error(
-                    `Database request failed: ${response.status}`
-                );
-            }
+    const ovrFilter =
+        document.getElementById("ovrFilter");
 
-            players = await response.json();
+    const positionFilter =
+        document.getElementById("positionFilter");
 
-            renderPlayers(players);
+    const versionFilter =
+        document.getElementById("versionFilter");
 
-        } catch (error) {
 
-            console.error(
-                "UFMB database error:",
-                error
-            );
-
-            showDatabaseError();
-
-        }
-
+    if (!grid) {
+        return;
     }
 
 
-    /* =====================================================
-       RENDER PLAYERS
-       ===================================================== */
+    try {
 
-    function renderPlayers(list) {
-
-        grid.innerHTML = "";
-
-        resultCount.textContent =
-            `${list.length} ${
-                list.length === 1
-                    ? "RESULT"
-                    : "RESULTS"
-            }`;
+        const response =
+            await fetch("data/players.json", {
+                cache: "no-cache"
+            });
 
 
-        if (list.length === 0) {
-
-            grid.innerHTML = `
-                <div class="empty-state">
-
-                    <strong>
-                        NO PLAYERS FOUND
-                    </strong>
-
-                    <span>
-                        Try changing your search or filters.
-                    </span>
-
-                </div>
-            `;
-
-            return;
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
         }
 
 
-        list.forEach(player => {
+        ufmbPlayers = await response.json();
 
-            grid.appendChild(
-                createPlayerCard(player)
+
+        if (!Array.isArray(ufmbPlayers)) {
+            throw new Error(
+                "Invalid database format."
             );
+        }
+
+
+        populateFilters();
+
+
+        const render = () => {
+            renderDatabase();
+        };
+
+
+        searchInput?.addEventListener(
+            "input",
+            render
+        );
+
+
+        ovrFilter?.addEventListener(
+            "change",
+            render
+        );
+
+
+        positionFilter?.addEventListener(
+            "change",
+            render
+        );
+
+
+        versionFilter?.addEventListener(
+            "change",
+            render
+        );
+
+
+        render();
+
+    } catch (error) {
+
+        console.error(
+            "UFMB Database error:",
+            error
+        );
+
+
+        grid.innerHTML = `
+            <div class="error-box">
+                Unable to load the database.
+            </div>
+        `;
+
+
+        updateResultCount(0);
+
+    }
+
+}
+
+
+/* =========================================================
+   FILTER OPTIONS
+   ========================================================= */
+
+function populateFilters() {
+
+    const positionFilter =
+        document.getElementById("positionFilter");
+
+    const versionFilter =
+        document.getElementById("versionFilter");
+
+
+    if (positionFilter) {
+
+        const positions =
+            [...new Set(
+                ufmbPlayers
+                    .map(player => player.position)
+                    .filter(Boolean)
+            )]
+            .sort();
+
+
+        positions.forEach((position) => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = position;
+            option.textContent = position;
+
+            positionFilter.appendChild(option);
 
         });
 
     }
 
 
-    /* =====================================================
-       PLAYER CARD
-       ===================================================== */
+    if (versionFilter) {
 
-function createPlayerCard(player) {
-    return createUFMBPlayerCard(player);
+        const versions =
+            [...new Set(
+                ufmbPlayers
+                    .map(player => player.version)
+                    .filter(Boolean)
+            )]
+            .sort();
+
+
+        versions.forEach((version) => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = version;
+            option.textContent = version;
+
+            versionFilter.appendChild(option);
+
+        });
+
+    }
+
 }
 
-    /* =====================================================
-       SEARCH + FILTERS
-       ===================================================== */
 
-    function filterPlayers() {
+/* =========================================================
+   RENDER
+   ========================================================= */
 
-        const search =
-            searchInput.value
-                .trim()
+function renderDatabase() {
+
+    const grid =
+        document.getElementById("databaseGrid");
+
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const ovrFilter =
+        document.getElementById("ovrFilter");
+
+    const positionFilter =
+        document.getElementById("positionFilter");
+
+    const versionFilter =
+        document.getElementById("versionFilter");
+
+
+    if (!grid) {
+        return;
+    }
+
+
+    const search =
+        (searchInput?.value || "")
+            .trim()
+            .toLowerCase();
+
+
+    const minimumOVR =
+        Number(ovrFilter?.value || 0);
+
+
+    const position =
+        positionFilter?.value || "";
+
+
+    const version =
+        versionFilter?.value || "";
+
+
+    const filtered =
+        ufmbPlayers.filter((player) => {
+
+            const searchableText = [
+                player.name,
+                player.nation,
+                player.position,
+                player.perk,
+                player.version
+            ]
+                .filter(Boolean)
+                .join(" ")
                 .toLowerCase();
 
 
-        const selectedOvr =
-            ovrFilter.value;
+            const matchesSearch =
+                !search ||
+                searchableText.includes(search);
 
 
-        const selectedPosition =
-            positionFilter.value;
+            const matchesOVR =
+                !minimumOVR ||
+                Number(player.ovr) >= minimumOVR;
 
 
-        const selectedVersion =
-            versionFilter.value;
+            const matchesPosition =
+                !position ||
+                player.position === position;
 
 
-        const filtered =
-            players.filter(player => {
+            const matchesVersion =
+                !version ||
+                player.version === version;
 
 
-                /* Search */
+            return (
+                matchesSearch &&
+                matchesOVR &&
+                matchesPosition &&
+                matchesVersion
+            );
 
-                const searchableText = [
-
-                    player.name,
-                    player.nation,
-                    player.position,
-                    player.perk,
-                    player.version
-
-                ]
-                    .join(" ")
-                    .toLowerCase();
+        });
 
 
-                const matchesSearch =
-                    !search ||
-                    searchableText.includes(search);
+    updateResultCount(filtered.length);
 
 
-                /* OVR */
-
-                let matchesOvr = true;
+    grid.innerHTML = "";
 
 
-                if (selectedOvr) {
-
-                    matchesOvr =
-                        player.ovr >=
-                        Number(selectedOvr);
-
-                }
-
-
-                /* Position */
-
-                const matchesPosition =
-                    !selectedPosition ||
-                    player.position ===
-                    selectedPosition;
-
-
-                /* Card version */
-
-                const matchesVersion =
-                    !selectedVersion ||
-                    player.version ===
-                    selectedVersion;
-
-
-                return (
-                    matchesSearch &&
-                    matchesOvr &&
-                    matchesPosition &&
-                    matchesVersion
-                );
-
-            });
-
-
-        renderPlayers(filtered);
-
-    }
-
-
-   /* =====================================================
-       DATABASE ERROR
-       ===================================================== */
-
-    function showDatabaseError() {
-
-        resultCount.textContent =
-            "DATABASE ERROR";
-
+    if (filtered.length === 0) {
 
         grid.innerHTML = `
-
-            <div class="empty-state">
-
-                <strong>
-                    DATABASE UNAVAILABLE
-                </strong>
-
-                <span>
-                    Please try again later.
-                </span>
-
+            <div class="loading-box">
+                No players match your filters.
             </div>
-
         `;
 
+        return;
     }
 
 
-    /* =====================================================
-       HTML SAFETY
-       ===================================================== */
+    filtered.forEach((player) => {
 
-    function escapeHTML(value) {
+        grid.appendChild(
+            createUFMBPlayerCard(player)
+        );
 
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    });
 
+}
+
+
+/* =========================================================
+   RESULT COUNT
+   ========================================================= */
+
+function updateResultCount(count) {
+
+    const resultCount =
+        document.getElementById("resultCount");
+
+    if (!resultCount) {
+        return;
     }
 
 
-    /* =====================================================
-       EVENT LISTENERS
-       ===================================================== */
+    resultCount.textContent =
+        `${count.toLocaleString()} player${count === 1 ? "" : "s"} found`;
 
-    searchInput.addEventListener(
-        "input",
-        filterPlayers
-    );
-
-
-    ovrFilter.addEventListener(
-        "change",
-        filterPlayers
-    );
-
-
-    positionFilter.addEventListener(
-        "change",
-        filterPlayers
-    );
-
-
-    versionFilter.addEventListener(
-        "change",
-        filterPlayers
-    );
-
-
-    /* =====================================================
-       START
-       ===================================================== */
-
-    loadDatabase();
-
-});
+           }
