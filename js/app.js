@@ -1,295 +1,258 @@
+/* =========================================================
+   UFMB — GLOBAL APP
+   V1
+   ========================================================= */
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
 document.addEventListener("DOMContentLoaded", () => {
-   
-/* =====================================================
+
+    initMobileMenu();
+    initYear();
+
+    const page = document.body.dataset.page;
+
+    if (page === "home") {
+        initHome();
+    }
+
+});
+
+
+/* =========================================================
    MOBILE MENU
-   ===================================================== */
+   ========================================================= */
 
-const menuButton = document.querySelector(".mobile-menu-button");
-const navLinks = document.querySelector(".nav-links");
+function initMobileMenu() {
 
-if (menuButton && navLinks) {
-    menuButton.addEventListener("click", () => {
-        navLinks.classList.toggle("active");
-    });
-}
-    
-    /* =====================================================
-       ACTIVE NAVIGATION
-       ===================================================== */
+    const button = document.getElementById("mobileMenuButton");
+    const nav = document.getElementById("navLinks");
 
-    const currentPage =
-        window.location.pathname.split("/").pop() || "index.html";
+    if (!button || !nav) {
+        return;
+    }
 
-    document.querySelectorAll(".nav-links a").forEach(link => {
 
-        const href = link.getAttribute("href");
+    button.addEventListener("click", () => {
 
-        if (href === currentPage) {
-            link.classList.add("active");
-        }
+        const isOpen = nav.classList.toggle("active");
+
+        button.setAttribute(
+            "aria-expanded",
+            String(isOpen)
+        );
 
     });
 
 
-    /* =====================================================
-       DEMO DATABASE
-       ===================================================== */
+    nav.querySelectorAll("a").forEach((link) => {
 
-    const players = [
-        {
-            name: "Beckenbauer",
-            ovr: 95,
-            position: "CB",
-            nation: "Germany",
-            pac: 84,
-            sho: 67,
-            pas: 91,
-            dri: 87,
-            def: 94,
-            phy: 82,
-            perk: "Leadership",
-            version: "Icon"
-        },
-        {
-            name: "Kahn",
-            ovr: 99,
-            position: "GK",
-            nation: "Germany",
-            pac: 72,
-            sho: 45,
-            pas: 76,
-            dri: 55,
-            def: 96,
-            phy: 91,
-            perk: "Wall",
-            version: "Icon"
-        },
-        {
-            name: "Hakimi",
-            ovr: 94,
-            position: "RB",
-            nation: "Morocco",
-            pac: 96,
-            sho: 76,
-            pas: 84,
-            dri: 88,
-            def: 79,
-            phy: 82,
-            perk: "Rapid",
-            version: "Night Palm Tree"
-        },
-        {
-            name: "Martínez",
-            ovr: 96,
-            position: "CB",
-            nation: "Argentina",
-            pac: 82,
-            sho: 51,
-            pas: 72,
-            dri: 68,
-            def: 95,
-            phy: 94,
-            perk: "Interceptor",
-            version: "Night Palm Tree"
-        },
-        {
-            name: "Cucurella",
-            ovr: 93,
-            position: "LB",
-            nation: "Spain",
-            pac: 87,
-            sho: 55,
-            pas: 81,
-            dri: 84,
-            def: 82,
-            phy: 78,
-            perk: "Pressing",
-            version: "Night Palm Tree"
-        },
-        {
-            name: "Olise",
-            ovr: 94,
-            position: "RM",
-            nation: "France",
-            pac: 88,
-            sho: 86,
-            pas: 91,
-            dri: 94,
-            def: 52,
-            phy: 70,
-            perk: "Playmaker",
-            version: "Night Palm Tree"
-        }
-    ];
+        link.addEventListener("click", () => {
 
+            nav.classList.remove("active");
 
-    /* =====================================================
-       LATEST CARDS
-       ===================================================== */
-
-    const latestCards = document.getElementById("latestCards");
-
-    if (latestCards) {
-
-        latestCards.innerHTML = "";
-
-        players.slice(0, 4).forEach(player => {
-
-            latestCards.appendChild(
-                createPlayerCard(player)
+            button.setAttribute(
+                "aria-expanded",
+                "false"
             );
 
         });
 
-    }
+    });
+
+}
 
 
-    /* =====================================================
-       PLAYER CARD BUILDER
-       ===================================================== */
+/* =========================================================
+   YEAR
+   ========================================================= */
 
-    function createPlayerCard(player) {
+function initYear() {
 
-        const card = document.createElement("article");
+    const yearElements = document.querySelectorAll("#currentYear");
 
-        card.className = "player-card";
+    yearElements.forEach((element) => {
+        element.textContent = new Date().getFullYear();
+    });
 
-        card.innerHTML = `
-            <div class="card-top">
-                <div>
-                    <div class="card-version">
-                        ${player.version}
+}
+
+
+/* =========================================================
+   HOME
+   ========================================================= */
+
+async function initHome() {
+
+    const featuredContainer =
+        document.getElementById("featuredCard");
+
+    const latestContainer =
+        document.getElementById("latestCards");
+
+
+    try {
+
+        const response =
+            await fetch("data/players.json", {
+                cache: "no-cache"
+            });
+
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+
+        const players = await response.json();
+
+
+        if (!Array.isArray(players)) {
+            throw new Error(
+                "Invalid players.json format."
+            );
+        }
+
+
+        updateHomeStats(players);
+
+
+        /* FEATURED */
+
+        if (featuredContainer && players.length > 0) {
+
+            const featured =
+                [...players]
+                    .sort((a, b) => Number(b.ovr) - Number(a.ovr))[0];
+
+
+            featuredContainer.innerHTML = "";
+
+            const card =
+                createUFMBPlayerCard(featured);
+
+            featuredContainer.appendChild(card);
+        }
+
+
+        /* LATEST */
+
+        if (latestContainer) {
+
+            latestContainer.innerHTML = "";
+
+            const latestPlayers =
+                players.slice(0, 6);
+
+
+            if (latestPlayers.length === 0) {
+
+                latestContainer.innerHTML = `
+                    <div class="loading-box">
+                        No players available yet.
                     </div>
+                `;
 
-                    <div class="card-position">
-                        ${player.position}
-                    </div>
-                </div>
-
-                <div class="card-rating">
-                    ${player.ovr}
-                </div>
-            </div>
-
-            <div class="card-name">
-                ${player.name}
-            </div>
-
-            <div class="card-nation">
-                ${player.nation}
-            </div>
-
-            <div class="card-stats">
-
-                ${stat("PAC", player.pac)}
-                ${stat("SHO", player.sho)}
-                ${stat("PAS", player.pas)}
-                ${stat("DRI", player.dri)}
-                ${stat("DEF", player.def)}
-                ${stat("PHY", player.phy)}
-
-            </div>
-        `;
-
-        card.addEventListener("click", () => {
-            showPlayerDetails(player);
-        });
-
-        return card;
-    }
+                return;
+            }
 
 
-    /* =====================================================
-       STAT BUILDER
-       ===================================================== */
+            latestPlayers.forEach((player) => {
 
-    function stat(label, value) {
+                latestContainer.appendChild(
+                    createUFMBPlayerCard(player)
+                );
 
-        return `
-            <div class="card-stat">
-                <strong>${value}</strong>
-                <small>${label}</small>
-            </div>
-        `;
+            });
 
-    }
+        }
 
+    } catch (error) {
 
-    /* =====================================================
-       PLAYER DETAILS
-       ===================================================== */
-
-    function showPlayerDetails(player) {
-
-        alert(
-            `${player.name}\n\n` +
-            `OVR: ${player.ovr}\n` +
-            `Position: ${player.position}\n` +
-            `Nation: ${player.nation}\n\n` +
-            `PAC: ${player.pac}\n` +
-            `SHO: ${player.sho}\n` +
-            `PAS: ${player.pas}\n` +
-            `DRI: ${player.dri}\n` +
-            `DEF: ${player.def}\n` +
-            `PHY: ${player.phy}\n\n` +
-            `Perk: ${player.perk}`
+        console.error(
+            "UFMB Home error:",
+            error
         );
 
+
+        if (featuredContainer) {
+
+            featuredContainer.innerHTML = `
+                <div class="error-box">
+                    Unable to load featured player.
+                </div>
+            `;
+
+        }
+
+
+        if (latestContainer) {
+
+            latestContainer.innerHTML = `
+                <div class="error-box">
+                    Unable to load database.
+                </div>
+            `;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   HOME STATS
+   ========================================================= */
+
+function updateHomeStats(players) {
+
+    const playerStat =
+        document.getElementById("statPlayers");
+
+    const cardStat =
+        document.getElementById("statCards");
+
+    const nationStat =
+        document.getElementById("statNations");
+
+
+    if (playerStat) {
+        playerStat.textContent =
+            players.length.toLocaleString();
     }
 
 
-    /* =====================================================
-       MOBILE NAVIGATION STYLE
-       ===================================================== */
+    if (cardStat) {
 
-    const mobileStyle = document.createElement("style");
+        const cards =
+            new Set(
+                players.map(
+                    player => player.version
+                )
+            );
 
-    mobileStyle.textContent = `
-        @media (max-width: 720px) {
-
-            .nav-links.mobile-open {
-                display: flex;
-
-                position: absolute;
-
-                top: 66px;
-                left: 0;
-                right: 0;
-
-                flex-direction: column;
-
-                gap: 0;
-
-                padding: 10px 6% 20px;
-
-                background: rgba(7, 9, 13, 0.97);
-
-                border-bottom:
-                    1px solid #202934;
-
-                backdrop-filter: blur(20px);
-            }
-
-            .nav-links.mobile-open a {
-                width: 100%;
-
-                padding: 16px 0;
-
-                border-bottom:
-                    1px solid #171e26;
-            }
-
-            .nav-links.mobile-open a:last-child {
-                border-bottom: 0;
-            }
-
-            .nav-links.mobile-open a.active::after {
-                display: none;
-            }
-        }
-    `;
-
-    document.head.appendChild(mobileStyle);
+        cardStat.textContent =
+            cards.size.toLocaleString();
+    }
 
 
-});
+    if (nationStat) {
+
+        const nations =
+            new Set(
+                players.map(
+                    player => player.nation
+                )
+            );
+
+        nationStat.textContent =
+            nations.size.toLocaleString();
+    }
+
+}
