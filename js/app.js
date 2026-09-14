@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-/* =====================================================
+   /* =====================================================
    MOBILE MENU
    ===================================================== */
 
@@ -11,7 +11,7 @@ if (menuButton && navLinks) {
     menuButton.addEventListener("click", () => {
         navLinks.classList.toggle("active");
     });
-       }
+}
     
     /* =====================================================
        ACTIVE NAVIGATION
