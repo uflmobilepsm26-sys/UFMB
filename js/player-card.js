@@ -1,6 +1,39 @@
 /* =========================================================
-   UFMB — SHARED PLAYER CARD
-   One card system for Home, Database & Latest
+   UFMB — SHARED PLAYER CARD SYSTEM
+   V1
+   ========================================================= */
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function escapeUFMBHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
+   STAT
+   ========================================================= */
+
+function createUFMBStat(label, value) {
+    return `
+        <div class="card-stat">
+            <strong>${escapeUFMBHTML(value)}</strong>
+            <small>${escapeUFMBHTML(label)}</small>
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   PLAYER CARD
    ========================================================= */
 
 function createUFMBPlayerCard(player) {
@@ -8,6 +41,13 @@ function createUFMBPlayerCard(player) {
     const card = document.createElement("article");
 
     card.className = "player-card";
+
+    card.tabIndex = 0;
+
+    card.setAttribute(
+        "aria-label",
+        `${player.name}, ${player.ovr} OVR`
+    );
 
     card.innerHTML = `
         <div class="card-top">
@@ -23,18 +63,21 @@ function createUFMBPlayerCard(player) {
             </div>
 
             <div class="card-rating">
-                ${player.ovr}
+                ${escapeUFMBHTML(player.ovr)}
             </div>
 
         </div>
+
 
         <div class="card-name">
             ${escapeUFMBHTML(player.name)}
         </div>
 
+
         <div class="card-nation">
             ${escapeUFMBHTML(player.nation)}
         </div>
+
 
         <div class="card-stats">
 
@@ -48,66 +91,169 @@ function createUFMBPlayerCard(player) {
         </div>
     `;
 
+
     card.addEventListener("click", () => {
         showUFMBPlayerDetails(player);
     });
+
+
+    card.addEventListener("keydown", (event) => {
+
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
+            event.preventDefault();
+
+            showUFMBPlayerDetails(player);
+        }
+
+    });
+
 
     return card;
 }
 
 
 /* =========================================================
-   STAT
-   ========================================================= */
-
-function createUFMBStat(label, value) {
-
-    return `
-        <div class="card-stat">
-            <strong>${value}</strong>
-            <small>${label}</small>
-        </div>
-    `;
-}
-
-
-/* =========================================================
-   PLAYER DETAILS
+   PLAYER MODAL
    ========================================================= */
 
 function showUFMBPlayerDetails(player) {
 
-    alert(
-        `${player.name}\n\n` +
-        `OVR: ${player.ovr}\n` +
-        `Position: ${player.position}\n` +
-        `Nation: ${player.nation}\n` +
-        `Card: ${player.version}\n\n` +
+    const modal = document.getElementById("playerModal");
 
-        `PAC: ${player.pac}\n` +
-        `SHO: ${player.sho}\n` +
-        `PAS: ${player.pas}\n` +
-        `DRI: ${player.dri}\n` +
-        `DEF: ${player.def}\n` +
-        `PHY: ${player.phy}\n\n` +
+    if (!modal) {
+        return;
+    }
 
-        `Perk: ${player.perk}`
-    );
 
+    modal.innerHTML = `
+        <div class="modal-content" role="dialog" aria-modal="true">
+
+            <button
+                class="modal-close"
+                type="button"
+                aria-label="Close"
+                onclick="closeUFMBPlayerDetails()"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-header">
+
+                <div class="modal-version">
+                    ${escapeUFMBHTML(player.version)}
+                </div>
+
+                <div class="modal-name">
+                    ${escapeUFMBHTML(player.name)}
+                </div>
+
+                <div class="modal-meta">
+                    ${escapeUFMBHTML(player.position)}
+                    ·
+                    ${escapeUFMBHTML(player.nation)}
+                    ·
+                    ${escapeUFMBHTML(player.ovr)} OVR
+                </div>
+
+            </div>
+
+
+            <div class="modal-stats">
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.pac)}</strong>
+                    <span>PAC</span>
+                </div>
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.sho)}</strong>
+                    <span>SHO</span>
+                </div>
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.pas)}</strong>
+                    <span>PAS</span>
+                </div>
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.dri)}</strong>
+                    <span>DRI</span>
+                </div>
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.def)}</strong>
+                    <span>DEF</span>
+                </div>
+
+                <div class="modal-stat">
+                    <strong>${escapeUFMBHTML(player.phy)}</strong>
+                    <span>PHY</span>
+                </div>
+
+            </div>
+
+
+            <div class="modal-perk">
+
+                <span>PERK</span>
+
+                <strong>
+                    ${escapeUFMBHTML(player.perk || "—")}
+                </strong>
+
+            </div>
+
+        </div>
+    `;
+
+
+    modal.hidden = false;
+
+    document.body.style.overflow = "hidden";
+
+
+    modal.onclick = (event) => {
+
+        if (event.target === modal) {
+            closeUFMBPlayerDetails();
+        }
+
+    };
 }
 
 
 /* =========================================================
-   HTML SAFETY
+   CLOSE MODAL
    ========================================================= */
 
-function escapeUFMBHTML(value) {
+function closeUFMBPlayerDetails() {
 
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const modal = document.getElementById("playerModal");
 
-                             }
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = true;
+
+    modal.innerHTML = "";
+
+    document.body.style.overflow = "";
+}
+
+
+/* =========================================================
+   ESCAPE KEY
+   ========================================================= */
+
+document.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+        closeUFMBPlayerDetails();
+    }
+
+});
