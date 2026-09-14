@@ -1,19 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* =====================================================
-       MOBILE MENU
-       ===================================================== */
+/* =====================================================
+   MOBILE MENU
+   ===================================================== */
 
-    const menuButton = document.querySelector(".mobile-menu-button");
-    const navLinks = document.querySelector(".nav-links");
+const menuButton = document.querySelector(".mobile-menu-button");
+const navLinks = document.querySelector(".nav-links");
 
-    if (menuButton && navLinks) {
-        menuButton.addEventListener("click", () => {
-            navLinks.classList.toggle("mobile-open");
-        });
-    }
-
-
+if (menuButton && navLinks) {
+    menuButton.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+    });
+       }
+    
     /* =====================================================
        ACTIVE NAVIGATION
        ===================================================== */
