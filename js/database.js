@@ -101,70 +101,9 @@ document.addEventListener("DOMContentLoaded", () => {
        PLAYER CARD
        ===================================================== */
 
-    function createPlayerCard(player) {
-
-        const card =
-            document.createElement("article");
-
-        card.className = "player-card";
-
-
-        card.innerHTML = `
-
-            <div class="card-top">
-
-                <div>
-
-                    <div class="card-version">
-                        ${escapeHTML(player.version)}
-                    </div>
-
-                    <div class="card-position">
-                        ${escapeHTML(player.position)}
-                    </div>
-
-                </div>
-
-                <div class="card-rating">
-                    ${player.ovr}
-                </div>
-
-            </div>
-
-
-            <div class="card-name">
-                ${escapeHTML(player.name)}
-            </div>
-
-
-            <div class="card-nation">
-                ${escapeHTML(player.nation)}
-            </div>
-
-
-            <div class="card-stats">
-
-                ${createStat("PAC", player.pac)}
-                ${createStat("SHO", player.sho)}
-                ${createStat("PAS", player.pas)}
-                ${createStat("DRI", player.dri)}
-                ${createStat("DEF", player.def)}
-                ${createStat("PHY", player.phy)}
-
-            </div>
-
-        `;
-
-
-        card.addEventListener(
-            "click",
-            () => showPlayerDetails(player)
-        );
-
-
-        return card;
-
-    }
+function createPlayerCard(player) {
+    return createUFMBPlayerCard(player);
+}
 
 
     /* =====================================================
