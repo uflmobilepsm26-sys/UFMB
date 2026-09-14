@@ -105,32 +105,6 @@ function createPlayerCard(player) {
     return createUFMBPlayerCard(player);
 }
 
-
-    /* =====================================================
-       STAT
-       ===================================================== */
-
-    function createStat(label, value) {
-
-        return `
-
-            <div class="card-stat">
-
-                <strong>
-                    ${value}
-                </strong>
-
-                <small>
-                    ${label}
-                </small>
-
-            </div>
-
-        `;
-
-    }
-
-
     /* =====================================================
        SEARCH + FILTERS
        ===================================================== */
@@ -224,36 +198,7 @@ function createPlayerCard(player) {
     }
 
 
-    /* =====================================================
-       PLAYER DETAILS
-       ===================================================== */
-
-    function showPlayerDetails(player) {
-
-        alert(
-
-            `${player.name}\n\n` +
-
-            `OVR: ${player.ovr}\n` +
-            `Position: ${player.position}\n` +
-            `Nation: ${player.nation}\n` +
-            `Card: ${player.version}\n\n` +
-
-            `PAC: ${player.pac}\n` +
-            `SHO: ${player.sho}\n` +
-            `PAS: ${player.pas}\n` +
-            `DRI: ${player.dri}\n` +
-            `DEF: ${player.def}\n` +
-            `PHY: ${player.phy}\n\n` +
-
-            `Perk: ${player.perk}`
-
-        );
-
-    }
-
-
-    /* =====================================================
+   /* =====================================================
        DATABASE ERROR
        ===================================================== */
 
