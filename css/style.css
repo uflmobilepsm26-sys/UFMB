@@ -1390,3 +1390,133 @@ select {
 @media (max-width: 1050px) {
 
   
+/* =========================
+   MOBILE RESPONSIVE
+   ========================= */
+
+@media (max-width: 720px) {
+
+    .navbar-inner {
+        padding: 14px 18px;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        padding: 10px 18px 18px;
+        background: rgba(10, 12, 18, 0.98);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links a {
+        width: 100%;
+        padding: 14px 8px;
+    }
+
+    .mobile-menu-button {
+        display: flex;
+    }
+
+    .hero {
+        min-height: auto;
+        padding: 70px 18px 50px;
+    }
+
+    .hero-content {
+        width: 100%;
+    }
+
+    .hero-title {
+        font-size: clamp(38px, 12vw, 64px);
+        line-height: 0.95;
+    }
+
+    .hero-description {
+        font-size: 15px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-buttons a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .hero-card-wrapper {
+        margin-top: 40px;
+        width: 100%;
+    }
+
+    .database-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .stat-item {
+        padding: 18px 10px;
+    }
+
+    .player-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .section {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .database-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .page {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .page-title {
+        font-size: 42px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 450px) {
+
+    .database-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hero-title {
+        font-size: 42px;
+    }
+
+    .featured-card {
+        padding: 18px;
+    }
+
+    .card-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
