@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Latest Cards — UFMB</title>
+    <meta
+        name="description"
+        content="Latest UFL MOBILE cards added to the UFMB database."
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-page="latest">
+
+<header class="site-header">
+    <div class="container nav-container">
+
+        <a href="index.html" class="brand">
+            <span class="brand-mark">UFMB</span>
+            <span class="brand-sub">UFL MOBILE BASE</span>
+        </a>
+
+        <button
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            ☰
+        </button>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="database.html">Database</a>
+            <a href="latest.html" class="active">Latest</a>
+            <a href="about.html">About</a>
+        </nav>
+
+    </div>
+</header>
+
+
+<main>
+
+    <section class="page-header">
+        <div class="container">
+
+            <span class="section-kicker">DATABASE UPDATES</span>
+
+            <h1>LATEST CARDS</h1>
+
+            <p>
+                Discover the latest players and cards currently available in UFMB.
+            </p>
+
+        </div>
+    </section>
+
+
+    <section class="database-section">
+        <div class="container">
+
+            <div class="database-result-bar">
+                <span id="latestCount">Loading...</span>
+            </div>
+
+            <div id="latestGrid" class="player-grid">
+                <div class="loading-box">
+                    Loading latest cards...
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+    <div class="container footer-content">
+
+        <div>
+            <strong>UFMB</strong>
+            <span>UFL MOBILE BASE</span>
+        </div>
+
+        <p>
+            Independent community project.
+        </p>
+
+        <p>
+            © <span id="currentYear"></span> UFMB
+        </p>
+
+    </div>
+</footer>
+
+
+<div id="playerModal" class="modal" hidden></div>
+
+
+<script src="js/player-card.js"></script>
+<script src="js/latest.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
